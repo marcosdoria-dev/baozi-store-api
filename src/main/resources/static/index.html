@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Baozi Store - API Management</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+    <div class="container py-5">
+        <header class="text-center mb-5">
+            <h1 class="display-5 fw-bold text-dark">🥟 Baozi Store API</h1>
+            <p class="text-muted">Painel de Gerenciamento - Uninter</p>
+        </header>
+
+        <div class="row g-4">
+            <!-- Cadastro de Cliente -->
+            <div class="col-md-4">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-body">
+                        <h3 class="card-title h5 mb-3 text-primary">Novo Cliente</h3>
+                        <form id="formCliente">
+                            <div class="mb-3">
+                                <label class="form-label">Nome e RU</label>
+                                <input type="text" class="form-control" id="nomeCliente" placeholder="Ex: Marcos 5556637" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Cliente Desde</label>
+                                <input type="date" class="form-control" id="dataCliente" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">Cadastrar Cliente</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cadastro de Produto -->
+            <div class="col-md-4">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-body">
+                        <h3 class="card-title h5 mb-3 text-success">Novo Produto</h3>
+                        <form id="formProduto">
+                            <div class="mb-3">
+                                <label class="form-label">Nome do Produto</label>
+                                <input type="text" class="form-control" id="nomeProduto" placeholder="Ex: Baozi de Carne" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Preço (R$)</label>
+                                <input type="number" step="0.01" class="form-control" id="precoProduto" placeholder="8.50" required>
+                            </div>
+                            <button type="submit" class="btn btn-success w-100">Cadastrar Produto</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cadastro de Pedido e Exclusão -->
+            <div class="col-md-4">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-body">
+                        <h3 class="card-title h5 mb-3 text-warning">Novo Pedido</h3>
+                        <form id="formPedido">
+                            <div class="mb-3">
+                                <label class="form-label">ID do Cliente</label>
+                                <input type="number" class="form-control" id="clienteId" placeholder="1" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">ID do Produto</label>
+                                <input type="number" class="form-control" id="produtoId" placeholder="1" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Quantidade</label>
+                                <input type="number" class="form-control" id="quantidade" placeholder="2" required>
+                            </div>
+                            <button type="submit" class="btn btn-warning w-100 text-white mb-3">Criar Pedido</button>
+                        </form>
+
+                        <!-- Deletar Registro (DELETE) -->
+                        <div class="pt-3 border-top">
+                            <label class="form-label text-danger fw-bold small">Deletar Registro (DELETE)</label>
+                            <div class="input-group input-group-sm mb-2">
+                                <select id="tipoDeletar" class="form-select">
+                                    <option value="clientes">Cliente</option>
+                                    <option value="produtos">Produto</option>
+                                    <option value="pedidos" selected>Pedido</option>
+                                </select>
+                                <input type="number" class="form-control" id="idDeletar" placeholder="ID">
+                                <button class="btn btn-outline-danger" onclick="deletarRegistro()">Excluir</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Seção de Listagem -->
+        <div class="row mt-5">
+            <div class="col-12">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h3 class="card-title h5 text-secondary m-0">Registros no Sistema (GET)</h3>
+                            <button class="btn btn-outline-secondary btn-sm" onclick="carregarDados()">Atualizar Listas</button>
+                        </div>
+                        <div id="resultado" class="bg-dark text-light p-3 rounded font-monospace" style="min-height: 350px; max-height: 500px; overflow-y: auto;">
+                            A carregar dados do sistema...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script JavaScript para consumir a API -->
+    <script>
+        document.getElementById('formCliente').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = {
+                nome: document.getElementById('nomeCliente').value,
+                clienteDesde: document.getElementById('dataCliente').value
+            };
+            const res = await fetch('/clientes', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            if(res.ok) { alert('Cliente cadastrado com sucesso!'); document.getElementById('formCliente').reset(); carregarDados(); }
+        });
+
+        document.getElementById('formProduto').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = {
+                nome: document.getElementById('nomeProduto').value,
+                preco: parseFloat(document.getElementById('precoProduto').value),
+                estoque: true
+            };
+            const res = await fetch('/produtos', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            if(res.ok) { alert('Produto cadastrado com sucesso!'); document.getElementById('formProduto').reset(); carregarDados(); }
+        });
+
+        document.getElementById('formPedido').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = {
+                clienteId: parseInt(document.getElementById('clienteId').value),
+                produtoId: parseInt(document.getElementById('produtoId').value),
+                quantidade: parseInt(document.getElementById('quantidade').value)
+            };
+            const res = await fetch('/pedidos', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            if(res.ok) { alert('Pedido criado com sucesso!'); document.getElementById('formPedido').reset(); carregarDados(); }
+        });
+
+        async function deletarRegistro() {
+            const tipo = document.getElementById('tipoDeletar').value;
+            const id = document.getElementById('idDeletar').value;
+            if(!id) { alert('Informe o ID do registo a ser excluído!'); return; }
+            
+            const res = await fetch(`/${tipo}/${id}`, { method: 'DELETE' });
+            if(res.ok || res.status === 204) {
+                alert('Registo excluído com sucesso!');
+                document.getElementById('idDeletar').value = '';
+                carregarDados();
+            } else {
+                alert('Erro ao excluir. Verifique se o ID informado existe.');
+            }
+        }
+
+        async function carregarDados() {
+            try {
+                const [cRes, pRes, pedRes] = await Promise.all([
+                    fetch('/clientes').then(r => r.json()),
+                    fetch('/produtos').then(r => r.json()),
+                    fetch('/pedidos').then(r => r.json())
+                ]);
+                
+                const payload = {
+                    clientes: cRes,
+                    produtos: pRes,
+                    pedidos: pedRes
+                };
+                
+                document.getElementById('resultado').innerText = JSON.stringify(payload, null, 2);
+            } catch (error) {
+                document.getElementById('resultado').innerText = "Erro ao carregar dados do servidor.";
+            }
+        }
+
+        // Carrega ao iniciar a página
+        carregarDados();
+    </script>
+</body>
+</html>
